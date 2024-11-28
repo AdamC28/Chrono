@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="style.css">
+        <title>Chrono</title>
+    </head>
+
+    <body>
+        <div id="container">
+            
+            <div id="gameContainer">
+                <div id="canvasContainer">
+                    <canvas id="gameCanvas" width="500" height="500">
+                        Accessible fallback text for canvas element
+                    </canvas>
+                </div>
+    
+                <div id="controlContainer">
+                    
+                    <div id="sizeContainer">
+                        <label for="sizeSelect">Board size:</label>
+                        <select id="sizeSelect" name="sizes">
+                            <option value="5" selected>5x5</option>
+                            <option value="7">7x7</option>
+                            <option value="9">9x9</option>
+                        </select>
+                    </div>
+    
+                    <button id="newPuzzleButton">New Puzzle</button>
+                    <button id="togglePath">Show me the way!</button>
+                    
+                </div>
+    
+                <script src="script.js"></script>
+            </div>
+
+        </div>
+    </body>
+</html>
