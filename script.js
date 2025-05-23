@@ -494,7 +494,7 @@ function undoButtonHandler(){
     }
 }
 
-//Iterates through given solution to check validity (a Chronos puzzle may have more than one!)
+//Iterates through given solution to check validity (a Chrono puzzle may have more than one!)
 function validateSolution(){
     let l = selectedTiles.length;
 

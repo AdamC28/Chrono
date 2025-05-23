@@ -10,7 +10,7 @@
 
             <div id="gameContainer">
                 <div id="titleBar">
-                    Chronos
+                    Chrono
                 </div>
 
                 <div id="canvasContainer">
@@ -40,6 +40,27 @@
                     <button id="undoButton">Undo</button>
                     <button id="submitButton">Submit</button>
                     
+                </div>
+
+                <div id="guideContainer">
+                    <div id="guide">
+                        <p><b>How to Play</b></p>
+                        <p>To solve a Chrono puzzle, you must create a path that visits all of the tiles on the board once, without crossing itself.</p>
+                        <p>Click a tile to add it to your path. The starting point is in light blue. Selected tiles are grey; your last selected tile is dark blue.</p>
+                        <p>You can only select tiles if they satisfy these rules:
+                            <ul>
+                                <li>The tile must be adjacent (including diagonally) to your previously selected tile.</li>
+                                <li>For every two tiles, the number of the following (third) tile must be the result of a a valid mathematical equation between the first two.
+                                    <ul>
+                                        <li>The first two tiles must complete an equation with the starting point's number. The result, on the second tile you select, is now the first
+                                            term in a new operation you must complete with two other tiles, and so on...
+                                        </li>
+                                        <li>A valid mathematical equation involves either <b>addition, subtraction, multiplication or integer division (the +, -, x, or / operators).</b></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </p>
+                    </div>
                 </div>
     
                 <script src="script.js"></script>
