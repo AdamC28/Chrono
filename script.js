@@ -1,3 +1,7 @@
+/*
+Represents a node in a linked list data structure.
+Used in generating the underlying "path" that determines the game board.
+*/
 class PathNode {
     constructor(prev, next){
         this.prev = prev;
@@ -12,6 +16,7 @@ class PathNode {
         this.prev = newPrev
     }
 
+    //swaps next and prev; used during initial path generation as part of "backbite" algorithm
     invertNode(){
         let temp = this.next;
         this.next = this.prev;
@@ -26,21 +31,19 @@ function arrayEquals(a, b) {
         a.every((val, index) => val === b[index]);
 }
 
+/*
+Wrapper function, called when the game checks if it should render the game solution
+Draws the game solution as a dotted line superimposed on the playing board.
+*/
 function draw(pathData, numData){
-
     let boardOffset = (500 - (boardSize * tileSize)) / 2;
-
-    function drawGrid(){
-        for (let i=0; i<rows; i++){
-            for (let j=0; j<cols; j++){
-                ctx.strokeRect(...toCanvasCoords(i, j, boardOffset, boardOffset), tileSize, tileSize)
-            }
-        }
-    }
 
     function drawPath(){
         ctx.strokeStyle = "red";
         ctx.lineWidth = 2;
+        ctx.setLineDash([10, 10]);
+        ctx.globalAlpha = 0.65;
+        ctx.lineCap = 'round';
         ctx.beginPath();
     
         let nextCoords = pathData.headCoords;
@@ -66,49 +69,20 @@ function draw(pathData, numData){
         }
     }
 
-    function drawNums(){
-        let numIndex = 0
-        let nextCoords = pathData.headCoords;
-    
-        while (nextCoords !== null){
-            ctx.fillText(numData[numIndex].toString(), ...toCanvasCoords(...nextCoords, boardOffset + (tileSize / 2), boardOffset + (tileSize / 2) - 5), 40)
-            numIndex += 1;
-
-            nextCoords = pathData.grid[nextCoords[0]][nextCoords[1]].next;
-        }
-    }
-
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-
-    ctx.fillStyle = "lightskyblue";
-    ctx.fillRect(...toCanvasCoords(...pathData.headCoords, boardOffset, boardOffset), tileSize, tileSize)
-
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 2;
-    drawGrid();
 
     if (showPath){
         drawPath()
     }
-
-    ctx.font = `${tileSize / 4}px sans-serif`
-    ctx.fillStyle = "black";
-    drawNums()
 }
 
 /*
-this function is intended to take a coordinate pair of list indices, like a point in the grid
-and scale it appropriately for drawing that point onto the canvas
+Scales a pair of grid coordinates for drawing that point onto the canvas.
 */
 function toCanvasCoords(x, y, xOffset, yOffset){
     //return [40 + yOffset + (40 * y), 40 + xOffset + (40 * x)]
     return [yOffset + (tileSize * y), xOffset + (tileSize * x)]
-}
-
-//todo: make this change size of canvas element corresponding to game board size
-function resizeCanvas(){
-
 }
 
 function clearCanvas(){
@@ -189,9 +163,6 @@ function initGridPath(rows, cols){
 
         grid.push(row);
     }
-
-    console.log("Initial computation done!")
-    console.log(grid);
 
     return {
         "grid": grid,
@@ -335,45 +306,68 @@ function backbite(pathData){
     return pathData
 }
 
-//generates the sequence of numbers that will be used to populate the game board
-function generateNumbers(rows, cols){
-    let iterations = ((rows * cols) - 1)/ 2;
-    console.log(iterations);
+//Updates static game variables to represent new puzzle
+function generatePuzzle(){
+    
+    //Generates the sequence of numbers that will be used to populate the game board
+    function generateNumbers(rows, cols){
+        let iterations = ((rows * cols) - 1)/ 2;
 
-    let seed = Math.ceil(Math.random() * 25);
-    console.log(seed);
-    let numBuffer = [seed];
+        let seed = Math.ceil(Math.random() * 25);
+        let numBuffer = [seed];
 
-    for (let i = 0; i < iterations; i++){
-        let term = Math.ceil(Math.random() * 25);
-        let resultBuffer = []
-        
-        if (seed + term < 100){
-            resultBuffer.push(seed + term);
+        for (let i = 0; i < iterations; i++){
+            let term = Math.ceil(Math.random() * 25);
+            let resultBuffer = []
+            
+            if (seed + term < 100){
+                resultBuffer.push(seed + term);
+            }
+
+            if (seed * term < 100){
+                resultBuffer.push(seed * term);
+            }
+
+            if (seed - term > 0){
+                resultBuffer.push(seed - term);
+            }
+
+            if (seed % term == 0){
+                resultBuffer.push(seed / term);
+            }
+
+            let result = resultBuffer[Math.floor(Math.random() * resultBuffer.length)];
+            numBuffer.push(term, result);
+            seed = result;
         }
 
-        if (seed * term < 100){
-            resultBuffer.push(seed * term);
-        }
-
-        if (seed - term > 0){
-            resultBuffer.push(seed - term);
-        }
-
-        if (seed % term == 0){
-            resultBuffer.push(seed / term);
-        }
-
-        let result = resultBuffer[Math.floor(Math.random() * resultBuffer.length)]
-        numBuffer.push(term, result);
-        seed = result;
+        return numBuffer;
     }
 
-    return numBuffer;
-}
+    //Helper function for generating individual tiles as part of game board markup
+    function generateTile(i, j, boardSize){
+        const tile = document.createElement('div');
 
-function generatePuzzle(){
+        tile.classList.add('tile');
 
+        if (boardSize == 5){
+            tile.classList.add('smallTile');
+        }
+        else if (boardSize == 7){
+            tile.classList.add('mediumTile');
+        }
+        else if (boardSize == 9){
+            tile.classList.add('largeTile');
+        }
+        else {
+            console.log("Error generating tile - invalid board size!");
+        }
+        
+        tile.id = `${i},${j}`;
+        tile.addEventListener("click", tileClickHandler);
+        return tile;
+    }
+    
     boardSize = sizeSelect.value;
     rows = boardSize;
     cols = boardSize;
@@ -388,6 +382,142 @@ function generatePuzzle(){
     clearCanvas();
     numPath = generateNumbers(rows, cols);
     draw(path, numPath);
+
+    //Code to add interactive divs to board
+
+    //Remove board if it already exists
+    if (document.querySelector("#gameBoard") !== null){
+        document.querySelector("#gameBoard").remove();
+    }
+
+    const gameBoard = document.createElement('div');
+    
+    if (boardSize == 5){
+        gameBoard.classList.add('smallBoard');
+    }
+    else if (boardSize == 7){
+        gameBoard.classList.add('mediumBoard');
+    }
+    else if (boardSize == 9){
+        gameBoard.classList.add('largeBoard');
+    }
+    else {
+        console.log("Error generating board - invalid board size!");
+    }
+
+    gameBoard.id = "gameBoard";
+
+    for (let i = 0; i < boardSize; i ++){
+        const row = document.createElement('div');
+        row.classList.add('row');
+
+        for (let j = 0; j < boardSize; j++){
+
+            row.append(generateTile(i, j, boardSize));
+        }
+
+        gameBoard.append(row);
+    }
+
+    boardContainer.append(gameBoard);
+    
+    let numIndex = 0
+    let nextCoords = path.headCoords;
+
+    document.getElementById(`${nextCoords[0]},${nextCoords[1]}`)
+    let startTile = document.getElementById(`${nextCoords[0]},${nextCoords[1]}`);
+    startTile.classList.add('startPoint');
+
+    selectedTiles = [startTile.id];
+
+    while (nextCoords !== null){
+        document.getElementById(`${nextCoords[0]},${nextCoords[1]}`).innerHTML = numPath[numIndex];
+        numIndex += 1;
+
+        nextCoords = path.grid[nextCoords[0]][nextCoords[1]].next;
+    }
+
+}
+
+/*
+Event handler for all tiles in game board, facilitates game interaction
+Modifies class list of selected tile appropriately as per game state
+*/
+function tileClickHandler(event){
+    
+    if (!(event.target.classList.contains("clickedTile") || event.target.classList.contains("startPoint") || event.target.classList.contains("currentTile"))){
+
+        cur = event.target.id.split(",");
+        prev = selectedTiles[selectedTiles.length - 1]
+        prevCoords = prev.split(",");
+
+        if ((parseInt(cur[0]) >= parseInt(prevCoords[0]) - 1 && 
+        parseInt(cur[0]) <= parseInt(prevCoords[0]) + 1) && 
+        ((parseInt(cur[1]) >= parseInt(prevCoords[1]) - 1 && 
+            parseInt(cur[1]) <= parseInt(prevCoords[1]) + 1))){
+
+            event.target.classList.add("currentTile");
+
+            prevTile = document.getElementById(prev);
+
+            if (!(prevTile.classList.contains("startPoint"))){
+                if (prevTile.classList.contains("currentTile")){
+                    prevTile.classList.remove("currentTile");
+                    prevTile.classList.add("clickedTile");
+                }
+            }
+    
+            selectedTiles.push(event.target.id);
+
+        } else {
+            alert("Tile is too far!");
+        }
+    }
+}
+
+/*
+Event handler for undo button
+Removes last selected tile from solution and updates classes appropriately, i.e: "inverse" of tileClickHandler
+*/
+function undoButtonHandler(){
+
+    if (selectedTiles.length > 1){
+        cur = selectedTiles.pop()
+        len = selectedTiles.length;
+        prev = selectedTiles[len - 1]
+
+        document.getElementById(cur).classList.remove("currentTile");
+
+        prevTile = document.getElementById(prev);
+        prevTile.classList.remove("clickedTile")
+        prevTile.classList.add("currentTile");
+    }
+}
+
+//Iterates through given solution to check validity (a Chrono puzzle may have more than one!)
+function validateSolution(){
+    let l = selectedTiles.length;
+
+    if (l <= 1 || l != boardSize * boardSize){
+        alert("Puzzle incomplete");
+    }
+
+    else {
+        for (let i = 0; i < l; i += 2){
+            let term = parseInt(document.getElementById(selectedTiles[i]).textContent);
+            let operand = parseInt(document.getElementById(selectedTiles[i+1]).textContent);
+
+            let results = [term + operand, term - operand, term * operand, term / operand];
+
+            if (!(results.includes(parseInt(document.getElementById(selectedTiles[i+2]).textContent)))){
+                alert("Invalid solution!");
+                return false
+            }
+
+            alert("Solution accepted! Congratulations!");
+            return true
+        }
+    }
 
 }
 
@@ -409,8 +539,18 @@ biteButton.addEventListener("click", newPuzzleHandler);
 const pathButton = document.getElementById("togglePath");
 pathButton.addEventListener("click", pathToggleHandler);
 
+const undoButton = document.getElementById("undoButton");
+undoButton.addEventListener("click", undoButtonHandler);
+
+const submitButton = document.getElementById("submitButton");
+submitButton.addEventListener("click", validateSolution);
+
+let selectedTiles = [];
+
 const sizeSelect = document.getElementById("sizeSelect");
 let boardSize = sizeSelect.value;
+
+const boardContainer = document.getElementById("boardContainer");
 
 let rows = boardSize;
 let cols = boardSize;
@@ -424,6 +564,7 @@ let sizeMapping = {
     7: 60,
     9: 50,
 }
+
 let tileSize = sizeMapping[boardSize];
 
 generatePuzzle();

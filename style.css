@@ -1,7 +1,46 @@
+:root {
+    --border: 2px solid black;
+}
+
+#titleBar {
+    text-align: center;
+    margin: 5px;
+    font-size: 32px;
+    color: white;
+    font-weight: bolder;
+}
+
+#gameContainer {
+    position: relative;
+}
+
 #gameCanvas {
     border: 3px solid #2b80ff;
-    background-color: white;
     border-radius: 5px;
+    position: absolute;
+    pointer-events: none;
+}
+
+#guideContainer {
+    border: 3px solid #2b80ff;
+    border-radius: 5px;
+    position: relative;
+    background-color: white;
+    width: 500px;
+    padding: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+#boardContainer {
+    border: 3px solid transparent;
+    border-radius: 5px;
+    width: 500px;
+    height: 500px;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #container {
@@ -13,6 +52,11 @@
 #controlContainer {
     display:flex;
     justify-content: center;
+    margin: 10px;
+}
+
+#inputContainer {
+    margin: 10px;
 }
 
 #sizeContainer {
@@ -27,8 +71,85 @@
     padding: 4px;
 }
 
+.row {
+    display: flex;
+}
+
+.row:nth-last-child(1) {
+    border-bottom: var(--border);
+}
+
+.tile {
+    transition-duration: 0.2s;
+    border-top: var(--border);
+    border-left: var(--border);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-color: white;
+    color: black;
+    font-size: 18px;
+}
+
+.clickedTile {
+    background-color: gray;
+}
+
+.currentTile {
+    background-color: #5266ff;
+}
+
+.tile:nth-last-child(1){
+    border-right: var(--border);
+}
+
+.tile:hover {
+    background-color: #f6ff4f;
+}
+
+.smallBoard {
+    width: 350px;
+    height: 350px;
+}
+
+.smallTile {
+    width: 68px;
+    height: 68px;
+}
+
+.mediumBoard {
+    width: 420px;
+    height: 420px;
+}
+
+.mediumTile {
+    width: 58px;
+    height: 58px;
+}
+
+.largeBoard {
+    width: 450px;
+    height: 450px;
+}
+
+.largeTile {
+    width: 48px;
+    height: 48px;
+}
+
+.startPoint {
+    background-color: lightskyblue;
+}
+
+.guideHeading {
+    font-weight: bold;
+}
+
 body {
-    background-color: #72abff
+    background-color: #72abff;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 button {
@@ -43,7 +164,7 @@ button {
 }
   
 button:hover {
-    background-color: #99c1fd; /* Green */
+    background-color: #99c1fd;
     color: white;
 }
 
@@ -54,6 +175,5 @@ button:active {
 label {
     color: white;
     font-size: 16px;
-    font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
 }
