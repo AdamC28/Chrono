@@ -545,12 +545,13 @@ undoButton.addEventListener("click", undoButtonHandler);
 const submitButton = document.getElementById("submitButton");
 submitButton.addEventListener("click", validateSolution);
 
-let selectedTiles = [];
-
 const sizeSelect = document.getElementById("sizeSelect");
 let boardSize = sizeSelect.value;
+sizeSelect.addEventListener("select", newPuzzleHandler);
 
 const boardContainer = document.getElementById("boardContainer");
+
+let selectedTiles = [];
 
 let rows = boardSize;
 let cols = boardSize;

@@ -170,6 +170,7 @@ button:hover {
 
 button:active {
     background-color: #0014a7;
+    color: white;
 }
 
 label {
